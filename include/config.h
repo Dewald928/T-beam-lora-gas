@@ -13,7 +13,7 @@
 #define PIN_MQ131 13
 
 #define CALIBRATE_SENSORS true
-
+// will use the following values if sensor is already calibrated
 #define MQ4_R0 (0.08) // R0 = 0.08V
 #define MQ9_R0 (0.60) // R0 = 0.60V
 #define MQ131_R0 (1.5) // R0 = 1.5V
