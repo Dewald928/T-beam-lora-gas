@@ -1,5 +1,7 @@
 #include "sensors.h"
 
+DynamicJsonDocument jsonBuffer(1024);
+
 MQUnifiedsensor MQ4(Board, Voltage_Resolution, ADC_Bit_Resolution, PIN_MQ4, ("MQ-4"));
 MQUnifiedsensor MQ9(Board, Voltage_Resolution, ADC_Bit_Resolution, PIN_MQ9, ("MQ-9"));
 MQUnifiedsensor MQ131(Board, Voltage_Resolution, ADC_Bit_Resolution, PIN_MQ131, ("MQ-131"));
@@ -81,4 +83,32 @@ float take_reading(MQUnifiedsensor *MQsensor)
     MQsensor->update();      // Update data, the arduino will be read the voltage on the analog pin
     // MQsensor.serialDebug(); // Will print the table on the serial port
     return MQsensor->readSensor();  // Sensor will read PPM concentration using the model and a and b values setted before or in the setup
+}
+
+void takeReadings()
+{
+    // take reading
+    float MQ4_ppm = take_reading(&MQ4);
+    float MQ9_ppm = take_reading(&MQ9);
+    float MQ131_ppm = take_reading(&MQ131);
+    Serial.print("MQ4 ppm: ");
+    Serial.print(MQ4_ppm);
+    Serial.print(", MQ9 ppm: ");
+    Serial.print(MQ9_ppm);
+    Serial.print(", MQ131 ppm: ");
+    Serial.print(MQ131_ppm);
+    // MQ4.serialDebug(); // Will print the table on the serial port
+
+    // Encode the data to send to Cayenne
+    JsonObject root = jsonBuffer.to<JsonObject>();
+    Serial.println();
+    lpp.reset();
+    lpp.addLuminosity(1, MQ4_ppm); //FIXME problem with signed int, addLuminosity instead or / 100
+    lpp.addLuminosity(2, MQ9_ppm);
+    lpp.addLuminosity(3, MQ131_ppm);
+
+    lpp.decodeTTN(lpp.getBuffer(), lpp.getSize(), root);
+
+    serializeJsonPretty(root, Serial);
+    Serial.println();
 }

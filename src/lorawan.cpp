@@ -7,7 +7,6 @@ static const u1_t PROGMEM DEVEUI[8] = {0xFF, 0xFE, 0x00, 0x79, 0x24, 0xB2, 0x67,
 // MSB mode
 static const u1_t PROGMEM APPKEY[16] = {0xEA, 0x32, 0x04, 0xCF, 0xEE, 0x43, 0x98, 0xD4, 0x25, 0x4E, 0xEB, 0x26, 0xD6, 0xE1, 0x2E, 0x5B};
 
-DynamicJsonDocument jsonBuffer(1024);
 
 // Pin mapping
 #ifdef STM32L073xx
@@ -46,33 +45,7 @@ void os_getDevKey(u1_t *buf)
     memcpy_P(buf, APPKEY, 16);
 }
 
-void takeReadings()
-{
-    // take reading
-    float MQ4_ppm = take_reading(&MQ4);
-    float MQ9_ppm = take_reading(&MQ9);
-    float MQ131_ppm = take_reading(&MQ131);
-    Serial.print("MQ4 ppm: ");
-    Serial.print(MQ4_ppm);
-    Serial.print(", MQ9 ppm: ");
-    Serial.print(MQ9_ppm);
-    Serial.print(", MQ131 ppm: ");
-    Serial.print(MQ131_ppm);
-    // MQ4.serialDebug(); // Will print the table on the serial port
 
-    // Encode the data to send to Cayenne
-    JsonObject root = jsonBuffer.to<JsonObject>();
-    Serial.println();
-    lpp.reset();
-    lpp.addLuminosity(1, MQ4_ppm); //FIXME problem with signed int, addLuminosity instead
-    lpp.addLuminosity(2, MQ9_ppm);
-    lpp.addLuminosity(3, MQ131_ppm);
-
-    lpp.decodeTTN(lpp.getBuffer(), lpp.getSize(), root);
-
-    serializeJsonPretty(root, Serial);
-    Serial.println();
-}
 
 void do_send(osjob_t *j)
 {

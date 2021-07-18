@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <MQUnifiedsensor.h> // MQ-sensor library
 #include "config.h"
+#include "lorawan.h"
 
 void calibrate_sensor(MQUnifiedsensor *, int);
 void init_sensors();
