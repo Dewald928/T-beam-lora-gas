@@ -4,6 +4,7 @@
 #include <MQUnifiedsensor.h> // MQ-sensor library
 #include "config.h"
 #include "lorawan.h"
+#include "MHSensor.h"
 
 void calibrate_sensor(MQUnifiedsensor *, int);
 void init_sensors();
@@ -13,6 +14,7 @@ float take_reading(MQUnifiedsensor *);
 extern MQUnifiedsensor MQ4;
 extern MQUnifiedsensor MQ9;
 extern MQUnifiedsensor MQ131;
+extern MHSensor MH440;
 
 /* MQ-2
     Exponential regression:

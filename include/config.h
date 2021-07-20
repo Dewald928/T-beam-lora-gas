@@ -1,5 +1,5 @@
 /************************Hardware Related Macros************************************/
-#define         Board                   ("ESP-32") // Wemos ESP-32 or other board, whatever have ESP32 core.
+#define         Board                   ("ESP-32") // TTGO T-beam in this case.
 /***********************Software Related Macros************************************/
 #define         Voltage_Resolution      (3.3) // 3V3 <- IMPORTANT. Source: https://randomnerdtutorials.com/esp32-adc-analog-read-arduino-ide/
 #define         ADC_Bit_Resolution      (12) // ESP-32 bit resolution. Source: https://randomnerdtutorials.com/esp32-adc-analog-read-arduino-ide/
@@ -11,6 +11,7 @@
 #define PIN_MQ4 25
 #define PIN_MQ9 14
 #define PIN_MQ131 13
+#define PIN_MH440 2
 
 #define CALIBRATE_SENSORS true
 // will use the following values if sensor is already calibrated

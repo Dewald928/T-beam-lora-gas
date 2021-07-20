@@ -5,6 +5,7 @@ DynamicJsonDocument jsonBuffer(1024);
 MQUnifiedsensor MQ4(Board, Voltage_Resolution, ADC_Bit_Resolution, PIN_MQ4, ("MQ-4"));
 MQUnifiedsensor MQ9(Board, Voltage_Resolution, ADC_Bit_Resolution, PIN_MQ9, ("MQ-9"));
 MQUnifiedsensor MQ131(Board, Voltage_Resolution, ADC_Bit_Resolution, PIN_MQ131, ("MQ-131"));
+MHSensor MH440(Board, Voltage_Resolution, ADC_Bit_Resolution, PIN_MH440, ("MH-440"));
 
 void calibrate_sensor(MQUnifiedsensor *MQsensor, int CleanAirRatio)
 {
@@ -62,6 +63,7 @@ void init_sensors()
     MQ4.init();
     MQ9.init();
     MQ131.init();
+    MH440.init();
     /* 
     //If the RL value is different from 10K please assign your RL value with the following method:
     MQ2.setRL(10); Done by measuring resistance of Aout and GND on breakout board
@@ -85,18 +87,28 @@ float take_reading(MQUnifiedsensor *MQsensor)
     return MQsensor->readSensor();  // Sensor will read PPM concentration using the model and a and b values setted before or in the setup
 }
 
+float take_readingMH(MHSensor *MHsensor)
+{
+    MHsensor->update();      // Update data, the arduino will be read the voltage on the analog pin
+    // MQsensor.serialDebug(); // Will print the table on the serial port
+    return MHsensor->readSensor();  // Sensor will read PPM concentration using the model and a and b values setted before or in the setup
+}
+
 void takeReadings()
 {
     // take reading
     float MQ4_ppm = take_reading(&MQ4);
     float MQ9_ppm = take_reading(&MQ9);
     float MQ131_ppm = take_reading(&MQ131);
+    float MH440_ppm = take_readingMH(&MH440);
     Serial.print("MQ4 ppm: ");
     Serial.print(MQ4_ppm);
     Serial.print(", MQ9 ppm: ");
     Serial.print(MQ9_ppm);
     Serial.print(", MQ131 ppm: ");
     Serial.print(MQ131_ppm);
+    Serial.print(", MH440 ppm: ");
+    Serial.print(MH440_ppm);
     // MQ4.serialDebug(); // Will print the table on the serial port
 
     // Encode the data to send to Cayenne
@@ -106,6 +118,7 @@ void takeReadings()
     lpp.addLuminosity(1, MQ4_ppm); //FIXME problem with signed int, addLuminosity instead or / 100
     lpp.addLuminosity(2, MQ9_ppm);
     lpp.addLuminosity(3, MQ131_ppm);
+    lpp.addAnalogInput(4, MH440_ppm);
 
     lpp.decodeTTN(lpp.getBuffer(), lpp.getSize(), root);
 
