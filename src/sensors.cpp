@@ -118,7 +118,7 @@ void takeReadings()
     lpp.addLuminosity(1, MQ4_ppm); //FIXME problem with signed int, addLuminosity instead or / 100
     lpp.addLuminosity(2, MQ9_ppm);
     lpp.addLuminosity(3, MQ131_ppm);
-    lpp.addAnalogInput(4, MH440_ppm);
+    lpp.addLuminosity(4, MH440_ppm);
 
     lpp.decodeTTN(lpp.getBuffer(), lpp.getSize(), root);
 

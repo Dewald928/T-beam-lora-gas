@@ -32,5 +32,7 @@ public:
     float getVoltage(int read = true);
 };
 
+float mapf(float, float, float, float, float);
+
 
 
