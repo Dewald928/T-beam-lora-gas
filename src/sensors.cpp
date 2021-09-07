@@ -7,6 +7,7 @@ MQUnifiedsensor MQ4(Board, Voltage_Resolution, ADC_Bit_Resolution, PIN_MQ4, ("MQ
 MQUnifiedsensor MQ9(Board, Voltage_Resolution, ADC_Bit_Resolution, PIN_MQ9, ("MQ-9"));
 MQUnifiedsensor MQ131(Board, Voltage_Resolution, ADC_Bit_Resolution, PIN_MQ131, ("MQ-131"));
 MHSensor MH440(Board, Voltage_Resolution, ADC_Bit_Resolution, PIN_MH440, ("MH-440"));
+int MH440_V = 0;
 
 void calibrate_sensor(MQUnifiedsensor *MQsensor, int CleanAirRatio)
 {
@@ -101,18 +102,17 @@ float take_reading(MQUnifiedsensor *MQsensor)
 
 float take_readingMH(MHSensor *MHsensor)
 {
-    int adc0;
     // read external adc voltage
     if (ads.checkADS1115())
     {
-        adc0 = ads.readVoltage(0);
+        MH440_V = ads.readVoltage(0);
     }
     else
     {
         Serial.println("ADS1115 Disconnected!");
     }
 
-    MHsensor->setADC(adc0);
+    MHsensor->setADC(MH440_V);
     return MHsensor->readSensor(); // Sensor will read PPM concentration using the model and a and b values setted before or in the setup
 }
 
@@ -122,15 +122,6 @@ void takeReadings()
     // float MQ4_ppm = take_reading(&MQ4);
     // float MQ9_ppm = take_reading(&MQ9);
     // float MQ131_ppm = take_reading(&MQ131);
-    int MH440_V = 0;
-    if (ads.checkADS1115())
-    {
-        MH440_V = ads.readVoltage(0);
-    }
-    else
-    {
-        Serial.println("ADS1115 Disconnected!");
-    }
     float MH440_ppm = take_readingMH(&MH440);
     // Serial.print("MQ4 ppm: ");
     // Serial.print(MQ4_ppm);
