@@ -2,9 +2,10 @@
 
 #include <Arduino.h>
 #include <stdint.h>
+#include <SoftwareSerial.h>
 
 #define ADC_RESOLUTION 12 // for 10bit analog to digital converter.
-#define retries 2
+#define retries 3
 #define retry_interval 20
 
 class MHSensor
@@ -28,7 +29,7 @@ public:
     void update();
 
     float readSensor();
-
+    void setADC(int value); //For external ADC Usage
     float getVoltage(int read = true);
 };
 

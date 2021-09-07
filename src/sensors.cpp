@@ -1,6 +1,7 @@
 #include "sensors.h"
 
 DynamicJsonDocument jsonBuffer(1024);
+DFRobot_ADS1115 ads(&Wire);
 
 MQUnifiedsensor MQ4(Board, Voltage_Resolution, ADC_Bit_Resolution, PIN_MQ4, ("MQ-4"));
 MQUnifiedsensor MQ9(Board, Voltage_Resolution, ADC_Bit_Resolution, PIN_MQ9, ("MQ-9"));
@@ -46,6 +47,16 @@ void calibrate_sensor(MQUnifiedsensor *MQsensor, int CleanAirRatio)
     MQsensor->serialDebug(true);
 }
 
+void init_externalADC()
+{
+    ads.setAddr_ADS1115(ADS1115_IIC_ADDRESS1); // 0x49
+    ads.setGain(eGAIN_TWOTHIRDS);              // 2/3x gain
+    ads.setMode(eMODE_SINGLE);                 // single-shot mode
+    ads.setRate(eRATE_128);                    // 128SPS (default)
+    ads.setOSMode(eOSMODE_SINGLE);             // Set to start a single-conversion
+    ads.init();
+}
+
 void init_sensors()
 {
     //Set math model to calculate the PPM concentration and the value of constants
@@ -73,7 +84,8 @@ void init_sensors()
     MQ131.setRL(1);
 
     // If not calibrating, use the following method to set R0 value
-    if (!CALIBRATE_SENSORS) {
+    if (!CALIBRATE_SENSORS)
+    {
         MQ4.setR0(MQ4_R0);
         MQ9.setR0(MQ9_R0);
         MQ131.setR0(MQ131_R0);
@@ -82,43 +94,67 @@ void init_sensors()
 
 float take_reading(MQUnifiedsensor *MQsensor)
 {
-    MQsensor->update();      // Update data, the arduino will be read the voltage on the analog pin
+    MQsensor->update(); // Update data, the arduino will be read the voltage on the analog pin
     // MQsensor.serialDebug(); // Will print the table on the serial port
-    return MQsensor->readSensor();  // Sensor will read PPM concentration using the model and a and b values setted before or in the setup
+    return MQsensor->readSensor(); // Sensor will read PPM concentration using the model and a and b values setted before or in the setup
 }
 
 float take_readingMH(MHSensor *MHsensor)
 {
-    MHsensor->update();      // Update data, the arduino will be read the voltage on the analog pin
-    // MQsensor.serialDebug(); // Will print the table on the serial port
-    return MHsensor->readSensor();  // Sensor will read PPM concentration using the model and a and b values setted before or in the setup
+    int adc0;
+    // read external adc voltage
+    if (ads.checkADS1115())
+    {
+        adc0 = ads.readVoltage(0);
+    }
+    else
+    {
+        Serial.println("ADS1115 Disconnected!");
+    }
+
+    MHsensor->setADC(adc0);
+    return MHsensor->readSensor(); // Sensor will read PPM concentration using the model and a and b values setted before or in the setup
 }
 
 void takeReadings()
 {
     // take reading
-    float MQ4_ppm = take_reading(&MQ4);
-    float MQ9_ppm = take_reading(&MQ9);
-    float MQ131_ppm = take_reading(&MQ131);
+    // float MQ4_ppm = take_reading(&MQ4);
+    // float MQ9_ppm = take_reading(&MQ9);
+    // float MQ131_ppm = take_reading(&MQ131);
+    int MH440_V = 0;
+    if (ads.checkADS1115())
+    {
+        MH440_V = ads.readVoltage(0);
+    }
+    else
+    {
+        Serial.println("ADS1115 Disconnected!");
+    }
     float MH440_ppm = take_readingMH(&MH440);
-    Serial.print("MQ4 ppm: ");
-    Serial.print(MQ4_ppm);
-    Serial.print(", MQ9 ppm: ");
-    Serial.print(MQ9_ppm);
-    Serial.print(", MQ131 ppm: ");
-    Serial.print(MQ131_ppm);
+    // Serial.print("MQ4 ppm: ");
+    // Serial.print(MQ4_ppm);
+    // Serial.print(", MQ4 Voltage: ");
+    // Serial.print(MQ4_V);
+    // Serial.print(", MQ9 ppm: ");
+    // Serial.print(MQ9_ppm);
+    // Serial.print(", MQ131 ppm: ");
+    // Serial.print(MQ131_ppm);
+    Serial.print("MH440 voltage: ");
+    Serial.print(MH440_V);
     Serial.print(", MH440 ppm: ");
-    Serial.print(MH440_ppm);
+    Serial.println(MH440_ppm);
     // MQ4.serialDebug(); // Will print the table on the serial port
 
     // Encode the data to send to Cayenne
     JsonObject root = jsonBuffer.to<JsonObject>();
     Serial.println();
     lpp.reset();
-    lpp.addLuminosity(1, MQ4_ppm); //FIXME problem with signed int, addLuminosity instead or / 100
-    lpp.addLuminosity(2, MQ9_ppm);
-    lpp.addLuminosity(3, MQ131_ppm);
-    lpp.addLuminosity(4, MH440_ppm);
+    // lpp.addLuminosity(1, MQ4_ppm); //FIXME problem with signed int, addLuminosity instead or / 100
+    // lpp.addLuminosity(2, MQ9_ppm);
+    // lpp.addLuminosity(3, MQ131_ppm);
+    lpp.addLuminosity(1, MH440_V);
+    lpp.addLuminosity(2, MH440_ppm);
 
     lpp.decodeTTN(lpp.getBuffer(), lpp.getSize(), root);
 

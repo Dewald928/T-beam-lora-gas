@@ -15,6 +15,14 @@ void MHSensor::init()
     pinMode(_pin, INPUT);
 }
 
+void MHSensor::setADC(int value)
+{
+  this-> _sensor_volt = value/1000.0; 
+  this-> _adc =  value;
+  Serial.print("Voltage (V): ");
+  Serial.print(_sensor_volt,4);
+}
+
 float MHSensor::getVoltage(int read)
 {
     float voltage;
@@ -45,16 +53,16 @@ float MHSensor::readSensor()
 {
     //More explained in: https://www.winsen-sensor.com/d/files/MH-440D.pdf
     // Get voltage
-    _sensor_volt = this->getVoltage();
+    // _sensor_volt = this->getVoltage();
     // If voltage below 0.4V, return fault value
-    if (_sensor_volt < 0.4)
+    if (_sensor_volt < 0.400)
     {
         return 0.0f;
     }
-    else if (_sensor_volt >= 0.4)
+    else
     {
         // If voltage above 0.4V, return ppm value
-        return mapf(_sensor_volt, 0.4, 2, 0, 100000);
+        return mapf(_sensor_volt, 0.400, 2, 0, 100000);
     }
 
     return _sensor_volt;

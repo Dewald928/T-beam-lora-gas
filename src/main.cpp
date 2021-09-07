@@ -16,12 +16,13 @@ void setup() {
 
   // Init sensors
   init_sensors();
+  init_externalADC();
 
   if (CALIBRATE_SENSORS)
   {
     calibrate_sensor(&MQ4, RatioMQ4CleanAir);
-    calibrate_sensor(&MQ9, RatioMQ9CleanAir);
-    calibrate_sensor(&MQ131, RatioMQ131CleanAir);
+    // calibrate_sensor(&MQ9, RatioMQ9CleanAir);
+    // calibrate_sensor(&MQ131, RatioMQ131CleanAir);
   }  
 
   // Init lorawan

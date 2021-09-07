@@ -27,7 +27,7 @@ const lmic_pinmap lmic_pins = {
 static osjob_t sendjob;
 static int spreadFactor = DR_SF7;
 static int joinStatus = EV_JOINING;
-static const unsigned TX_INTERVAL = 30;
+static const unsigned TX_INTERVAL = T_INTERVAL;
 static String lora_msg = "";
 
 void os_getArtEui(u1_t *buf)
