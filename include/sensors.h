@@ -2,19 +2,24 @@
 
 #include <Arduino.h>
 #include <MQUnifiedsensor.h> // MQ-sensor library
+#include <Wire.h>
+#include <DFRobot_ADS1115.h> // external ADC library
 #include "config.h"
 #include "lorawan.h"
 #include "MHSensor.h"
 
 void calibrate_sensor(MQUnifiedsensor *, int);
+void init_externalADC();
 void init_sensors();
 float take_reading(MQUnifiedsensor *);
+float take_readingMH(MHSensor *);
 
 /*****************************Globals***********************************************/
 extern MQUnifiedsensor MQ4;
 extern MQUnifiedsensor MQ9;
 extern MQUnifiedsensor MQ131;
 extern MHSensor MH440;
+extern DFRobot_ADS1115 ads;
 
 /* MQ-2
     Exponential regression:
