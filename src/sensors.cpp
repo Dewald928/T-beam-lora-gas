@@ -8,6 +8,9 @@ MQUnifiedsensor MQ9(Board, Voltage_Resolution, ADC_Bit_Resolution, PIN_MQ9, ("MQ
 MQUnifiedsensor MQ131(Board, Voltage_Resolution, ADC_Bit_Resolution, PIN_MQ131, ("MQ-131"));
 MHSensor MH440(Board, Voltage_Resolution, ADC_Bit_Resolution, PIN_MH440, ("MH-440"));
 int MH440_V = 0;
+const int count = 30;
+int MH440_V_arr[count];
+int MH440_ppm_arr[count];
 
 void calibrate_sensor(MQUnifiedsensor *MQsensor, int CleanAirRatio)
 {
@@ -105,7 +108,7 @@ float take_readingMH(MHSensor *MHsensor)
     // read external adc voltage
     if (ads.checkADS1115())
     {
-        MH440_V = ads.readVoltage(0);
+        MH440_V = ads.readVoltage(0) - V_OFFSET;
     }
     else
     {
@@ -118,34 +121,42 @@ float take_readingMH(MHSensor *MHsensor)
 
 void takeReadings()
 {
-    // take reading
-    // float MQ4_ppm = take_reading(&MQ4);
-    // float MQ9_ppm = take_reading(&MQ9);
-    // float MQ131_ppm = take_reading(&MQ131);
-    float MH440_ppm = take_readingMH(&MH440);
-    // Serial.print("MQ4 ppm: ");
-    // Serial.print(MQ4_ppm);
-    // Serial.print(", MQ4 Voltage: ");
-    // Serial.print(MQ4_V);
-    // Serial.print(", MQ9 ppm: ");
-    // Serial.print(MQ9_ppm);
-    // Serial.print(", MQ131 ppm: ");
-    // Serial.print(MQ131_ppm);
-    Serial.print("MH440 voltage: ");
-    Serial.print(MH440_V);
-    Serial.print(", MH440 ppm: ");
-    Serial.println(MH440_ppm);
-    // MQ4.serialDebug(); // Will print the table on the serial port
+    float MH440_ppm;
+    for (size_t i = 0; i < count; i++)
+    {
+        MH440_ppm = take_readingMH(&MH440);
+        Serial.print("MH440 voltage: ");
+        Serial.print(MH440_V);
+        Serial.print(", MH440 ppm: ");
+        Serial.println(MH440_ppm);
+        MH440_V_arr[i] = MH440_V;
+        MH440_ppm_arr[i] = MH440_ppm;
+        delay(1000);
+    }
+
+    int sum_V = 0;
+    int sum_ppm = 0;
+
+    for (size_t i = 0; i < count; i++)
+    {
+        sum_V += MH440_V_arr[i];
+        sum_ppm += MH440_ppm_arr[i];
+    }
+
+    int MH440_V_avg = (float)sum_V / count;
+    int MH440_ppm_avg = (float)sum_ppm / count;
+
+    Serial.print("MH440 voltage avg: ");
+    Serial.print(MH440_V_avg);
+    Serial.print(", MH440 ppm avg: ");
+    Serial.println(MH440_ppm_avg);
 
     // Encode the data to send to Cayenne
     JsonObject root = jsonBuffer.to<JsonObject>();
     Serial.println();
     lpp.reset();
-    // lpp.addLuminosity(1, MQ4_ppm); //FIXME problem with signed int, addLuminosity instead or / 100
-    // lpp.addLuminosity(2, MQ9_ppm);
-    // lpp.addLuminosity(3, MQ131_ppm);
-    lpp.addLuminosity(1, MH440_V);
-    lpp.addLuminosity(2, MH440_ppm);
+    lpp.addLuminosity(1, MH440_V_avg);
+    lpp.addLuminosity(2, MH440_ppm_avg);
 
     lpp.decodeTTN(lpp.getBuffer(), lpp.getSize(), root);
 
