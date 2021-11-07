@@ -19,4 +19,5 @@
 #define MQ9_R0 (2.9926) // R0 0.111
 #define MQ131_R0 (11.5122) // R0 0.019
 
-#define T_INTERVAL (20) // time interval between two measurements
+#define T_INTERVAL (10) // time interval between two measurements
+#define V_OFFSET (44) // voltage offset

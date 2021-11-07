@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 #include <stdint.h>
-#include <SoftwareSerial.h>
+// #include <SoftwareSerial.h>
 
 #define ADC_RESOLUTION 12 // for 10bit analog to digital converter.
 #define retries 3
