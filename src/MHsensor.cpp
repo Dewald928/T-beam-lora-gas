@@ -20,7 +20,7 @@ void MHSensor::setADC(int value)
   this-> _sensor_volt = value/1000.0; 
   this-> _adc =  value;
   Serial.print("Voltage (V): ");
-  Serial.print(_sensor_volt,4);
+  Serial.println(_sensor_volt);
 }
 
 float MHSensor::getVoltage(int read)
